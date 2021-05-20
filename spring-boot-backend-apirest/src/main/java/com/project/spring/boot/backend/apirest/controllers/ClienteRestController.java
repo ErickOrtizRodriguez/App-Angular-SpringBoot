@@ -2,6 +2,7 @@ package com.project.spring.boot.backend.apirest.controllers;
 
 import com.project.spring.boot.backend.apirest.models.entity.Cliente;
 import com.project.spring.boot.backend.apirest.models.services.IClienteService;
+import com.project.spring.boot.backend.apirest.models.services.IUploadFileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class ClienteRestController {
 
     @Autowired
     private IClienteService clienteService;
+
+    @Autowired
+    private IUploadFileService uploadFileService;
 
     private final Logger log = LoggerFactory.getLogger(ClienteRestController.class);
 
@@ -159,6 +163,7 @@ public class ClienteRestController {
             clienteActual.setNombre(cliente.getNombre());
             clienteActual.setApellido(cliente.getApellido());
             clienteActual.setEmail(cliente.getEmail());
+            clienteActual.setCreateAt(cliente.getCreateAt());
 
             clienteUpdates = clienteService.save(clienteActual);
 
@@ -187,14 +192,9 @@ public class ClienteRestController {
         try {
             Cliente cliente = clienteService.findById(id);
             String nombreFotoAnterior = cliente.getFoto();
-            if(nombreFotoAnterior != null && nombreFotoAnterior.length() > 0){
-                Path rutaFotoAnterior = Paths.get("uploads").resolve(nombreFotoAnterior).toAbsolutePath();
-                File archivoFotoAnterior = rutaFotoAnterior.toFile();
-                if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()){
-                    archivoFotoAnterior.delete();
-                }
 
-            }
+            uploadFileService.eliminar(nombreFotoAnterior);
+
             clienteService.delete(id);
 
         }catch(DataAccessException e){
@@ -215,12 +215,10 @@ public class ClienteRestController {
         Cliente cliente = clienteService.findById(id);
 
         if(!archivo.isEmpty()){
-            String nombreArchivo = UUID.randomUUID().toString() +"_"+ archivo.getOriginalFilename().replace(" ", "");
+            String nombreArchivo = null;
 
-            Path rutaArchivo = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
-            log.info(rutaArchivo.toString());
             try {
-                Files.copy(archivo.getInputStream(),rutaArchivo);
+                nombreArchivo = uploadFileService.copiar(archivo);
             } catch (IOException e) {
                 response.put("mensaje","Error al Subir la imagen: "+ nombreArchivo);
                 response.put("error",e.getMessage().concat(":").concat(e.getCause().getMessage()));
@@ -228,14 +226,7 @@ public class ClienteRestController {
             }
 
             String nombreFotoAnterior = cliente.getFoto();
-            if(nombreFotoAnterior != null && nombreFotoAnterior.length() > 0){
-                Path rutaFotoAnterior = Paths.get("uploads").resolve(nombreFotoAnterior).toAbsolutePath();
-                File archivoFotoAnterior = rutaFotoAnterior.toFile();
-                if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()){
-                    archivoFotoAnterior.delete();
-                }
-
-            }
+            uploadFileService.eliminar(nombreFotoAnterior);
 
             cliente.setFoto(nombreArchivo);
             clienteService.save(cliente);
@@ -248,20 +239,14 @@ public class ClienteRestController {
 
     @GetMapping("/uploads/img/{nombreFoto:.+}")
     public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto){
-        Path rutaArchivo = Paths.get("uploads").resolve(nombreFoto).toAbsolutePath();
-        log.info(rutaArchivo.toString());
+
         Resource recurso = null;
-
-
         try {
-            recurso = new UrlResource(rutaArchivo.toUri());
+            recurso =uploadFileService.cargar(nombreFoto);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
-        if(!recurso.exists() && !recurso.isReadable()){
-            throw new RuntimeException("Error al cargar la imagen: "+ nombreFoto);
-        }
         HttpHeaders cabecera = new HttpHeaders();
         cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
 

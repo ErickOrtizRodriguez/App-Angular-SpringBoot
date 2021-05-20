@@ -31,7 +31,7 @@ export class ClientesComponent implements OnInit {
     private modalService: ModalService
   ) { }
 
-  clientes: Cliente[] = [];
+  clientes:any = Cliente;
   paginador:any;
   clienteSeleccionado: Cliente = new Cliente;
 
@@ -49,17 +49,27 @@ export class ClientesComponent implements OnInit {
         console.log("clienteCompnent tap 3");
         (response.content as Cliente[]).forEach(cliente =>
           {
-            console.log(response.nombre);
+            console.log("fecha",response.createAt);
           });
       })
 
     ).subscribe(
       response => {
         this.clientes = response.content as Cliente[];
+        // console.log(this.clientes);
         this.paginador = response;
       });
 
     }); 
+
+    this.modalService.notificarUpload.subscribe(cliente =>{
+      this.clientes = this.clientes.map((clienteOriginal:any) =>{
+        if(cliente.id == clienteOriginal.id){
+          clienteOriginal.foto = cliente.foto;
+        }
+        return clienteOriginal;
+      })
+    });
   }
 
  delete(cliente: Cliente){
@@ -75,7 +85,7 @@ export class ClientesComponent implements OnInit {
       if (result.isConfirmed) {
         this.clienteService.delete(cliente.id).subscribe(
           data =>{
-            this.clientes = this.clientes.filter(cli => cli !== cliente)
+            this.clientes = this.clientes.filter((cli: Cliente) => cli !== cliente)
             this.Toast.fire({
               icon: 'success',
               title:  `Usuario ${cliente.nombre} Eliminado`

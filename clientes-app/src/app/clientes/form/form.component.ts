@@ -83,7 +83,7 @@ export class FormComponent implements OnInit {
         icon: 'success',
         title: `Usuario ${this.clientes.nombre} Actualizado`
       })
-      console.log(cliente.nombre);
+      console.log("Cliente",cliente.createAt);
     },
     err =>{
       this.errores = err.error.errors as string[];
