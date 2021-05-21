@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Cliente } from '../cliente'
 import { ClienteService } from '../cliente.service';
+import { Region } from '../region';
 
 
 
@@ -17,6 +18,7 @@ export class FormComponent implements OnInit {
 
   public clientes: Cliente =  new Cliente();
   public errores: String[] =[];
+  regiones:Region[]=[];
 
    Toast = Swal.mixin({
     toast: true,
@@ -41,6 +43,11 @@ export class FormComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarCliente();
+
+    this.clienteService.getRegiones().subscribe(regiones =>{
+      this.regiones = regiones;
+    });
+
   }
 
   cargarCliente(): void {
@@ -95,6 +102,14 @@ export class FormComponent implements OnInit {
     
     console.log("Clicked");
     console.log(this.clientes);
+  }
+
+  compararRegion(region1:Region,region2:Region): boolean{
+    if(region1 === undefined && region2 === undefined){
+      return true;
+    }
+   
+    return region1 === null || region2 === null || region1 === undefined || region2 === undefined? false: region1.id===region2.id;
   }
 
 }

@@ -1,6 +1,7 @@
 package com.project.spring.boot.backend.apirest.controllers;
 
 import com.project.spring.boot.backend.apirest.models.entity.Cliente;
+import com.project.spring.boot.backend.apirest.models.entity.Region;
 import com.project.spring.boot.backend.apirest.models.services.IClienteService;
 import com.project.spring.boot.backend.apirest.models.services.IUploadFileService;
 import org.slf4j.Logger;
@@ -164,6 +165,7 @@ public class ClienteRestController {
             clienteActual.setApellido(cliente.getApellido());
             clienteActual.setEmail(cliente.getEmail());
             clienteActual.setCreateAt(cliente.getCreateAt());
+            clienteActual.setRegion(cliente.getRegion());
 
             clienteUpdates = clienteService.save(clienteActual);
 
@@ -253,6 +255,11 @@ public class ClienteRestController {
 
         return  new ResponseEntity<Resource>(recurso,cabecera,HttpStatus.OK);
 
+    }
+
+    @GetMapping("clientes/regiones")
+    public List<Region> listaRegiones(){
+        return clienteService.findAllRegiones();
     }
 
 

@@ -1,5 +1,7 @@
 package com.project.spring.boot.backend.apirest.models.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -39,6 +41,12 @@ public class Cliente implements Serializable{
 
 
     private  String foto;
+
+    @NotNull(message = "La region no puede estar vacio")
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // ignorar las propiedas que por defecto tra el metodo lazy
+    private Region region;
 
 //    metodo para ingresar la fecha de forma automatica
 //    @PrePersist
@@ -94,5 +102,13 @@ public class Cliente implements Serializable{
 
     public void setFoto(String foto) {
         this.foto = foto;
+    }
+
+    public Region getRegion() {
+        return region;
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
     }
 }

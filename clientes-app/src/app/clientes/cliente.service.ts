@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CLIENTES } from './clientes.json'
+// import { CLIENTES } from './clientes.json'
 import { Cliente } from './cliente';
 import { Observable, of, throwError } from 'rxjs';
 import { HttpClient, HttpEvent, HttpHeaders, HttpRequest } from '@angular/common/http';
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { DatePipe, formatDate, registerLocaleData } from '@angular/common';
 import localeES from '@angular/common/locales/es';
+import { Region } from './region';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +34,10 @@ export class ClienteService {
     private http: HttpClient,
     private router: Router,
   ) { }
+
+  getRegiones(): Observable<Region[]>{
+    return this.http.get<Region[]>(this.url + '/regiones');
+  }
 
   getClientes(page:number): Observable<any>{
     // return of(CLIENTES);
