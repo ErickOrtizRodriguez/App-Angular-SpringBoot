@@ -13,7 +13,7 @@ import { FormComponent } from './clientes/form/form.component'
 import { FormsModule } from '@angular/forms';
 import { registerLocaleData } from '@angular/common';
 import localeES from '@angular/common/locales/es';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DetalleComponent } from './clientes/detalle/detalle.component';
@@ -45,7 +45,7 @@ const routes: Routes =[
     FormsModule,
     RouterModule.forRoot(routes),
     BrowserAnimationsModule,
-    MatDatepickerModule, MatNativeDateModule,
+    MatDatepickerModule, MatMomentDateModule,
   ],
   providers: [{provide: LOCALE_ID, useValue: 'eS' }],
   bootstrap: [AppComponent]
