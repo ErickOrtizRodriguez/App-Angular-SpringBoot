@@ -18,15 +18,22 @@ export class AuthService {
 
   public get usuario():Usuario{
     
-    if(this._usuario != null){
+   /* if(this._usuario != null){
       return this._usuario;
     }else if(this._usuario == null && sessionStorage.getItem('usuario') != null){
-      // this._usuario=JSON.parse(sessionStorage.getItem('usuario')!);
+      this._usuario=JSON.parse(sessionStorage.getItem('usuario')!) as Usuario;
       // let payload = JSON.parse(atob(sessionStorage.getItem('usuario'));
     //   const serializableState: string | any = sessionStorage.getItem('usuario') as Usuario;
     // return serializableState !== null || serializableState === undefined ? JSON.parse(serializableState) : undefined;
-      const user = sessionStorage.getItem('usuario');
-      this._usuario = user !== null ? JSON.parse(user) as Usuario:new Usuario;
+      
+    // const user = sessionStorage.getItem('usuario');
+      // this._usuario = user !== null ? JSON.parse(user):new Usuario;
+      // return this._usuario =JSON.parse(sessionStorage.getItem('usuario')!);
+      return this._usuario;
+    }
+    return new Usuario();*/
+    if(sessionStorage.getItem('usuario') != null){
+      this._usuario=JSON.parse(sessionStorage.getItem('usuario')!) as Usuario;
       return this._usuario;
     }
     return new Usuario();
@@ -60,14 +67,13 @@ export class AuthService {
 
   guardarUsuario(accessToken:string): void{
     let payload = this.obtenerDatosToken(accessToken);
-    this._usuario = new Usuario();
-    this._usuario.nombre =payload.nombre;
-    this._usuario.apellido =payload.apellido;
-    this._usuario.email =payload.email;
-    this._usuario.username =payload.username;
+    this._usuario.nombre =payload.Nombre_Usuario;
+    this._usuario.apellido =payload.Apellido_Usuario;
+    this._usuario.email =payload.Email_Usuario;
+    this._usuario.username =payload.user_name;
     this._usuario.roles =payload.authorities;
 
-    sessionStorage.setItem('usuario',JSON.stringify(payload));
+    sessionStorage.setItem('usuario',JSON.stringify(this._usuario));
 
 
   }
@@ -90,6 +96,22 @@ export class AuthService {
   isAuthenticated():boolean{
     let payload = this.obtenerDatosToken(this.token);
     if(payload != null && payload.user_name && payload.user_name.length > 0){
+      return true;
+    }
+    return false;
+  }
+
+  logout():void{
+    this._usuario = new Usuario();
+    this._token = null;
+    sessionStorage.clear();
+
+    // sessionStorage.removeItem('token');
+    // sessionStorage.removeItem('usuario');
+  }
+
+  hasRol(role:string):boolean {
+    if(this.usuario.roles.includes(role)){
       return true;
     }
     return false;

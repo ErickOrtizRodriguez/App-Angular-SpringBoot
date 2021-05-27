@@ -27,7 +27,7 @@
                                 {{cliente.region.nombre}}
                             </li>
                         </ul>
-                        <div class="input-group">
+                        <div class="input-group" *ngIf="authService.hasRol('ROLE_ADMIN')">
                             <input (change)="seleccionarFoto($event)" type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
                             <button (click)="subirFoto()" [disabled]="!fotoSelecionada" class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon04">Subir Foto</button>
                           </div>

@@ -64,7 +64,6 @@ export class LoginComponent implements OnInit {
 
       let usuari = this.authService.usuario;
       console.log(usuari);
-      alert(usuari);
 
       this.Toast.fire({
         icon: 'success',

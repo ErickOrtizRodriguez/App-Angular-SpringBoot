@@ -7,6 +7,7 @@ import { isNull } from '@angular/compiler/src/output/output_ast';
 import { EMPTY, empty } from 'rxjs';
 import { HttpEventType } from '@angular/common/http';
 import { ModalService } from './modal.service';
+import { AuthService } from 'src/app/usuarios/auth.service';
 
 @Component({
   selector: 'detalle-cliente',
@@ -37,7 +38,8 @@ export class DetalleComponent implements OnInit {
   constructor(
     private clienteService:ClienteService,
     private activatedRoute: ActivatedRoute,
-    public modalService: ModalService
+    public modalService: ModalService,
+    public authService:AuthService
   ) { }
 
   ngOnInit(): void {

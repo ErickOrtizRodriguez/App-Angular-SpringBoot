@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { DatePipe, formatDate, registerLocaleData } from '@angular/common';
 import localeES from '@angular/common/locales/es';
 import { Region } from './region';
+import { AuthService } from '../usuarios/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ import { Region } from './region';
 export class ClienteService {
 
   private url = 'http://localhost:8080/api/clientes'
-  private httpHeaders = new HttpHeaders({'Content-Type': 'application/json'})
+
+  // private httpHeaders = new HttpHeaders({'Content-Type': 'application/json'})
 
   Toast = Swal.mixin({
     toast: true,
@@ -32,23 +34,50 @@ export class ClienteService {
   constructor(
     private http: HttpClient,
     private router: Router,
+    private authService: AuthService
   ) { }
 
-  private isNoAutorizado(e:any):boolean{
-    if(e.status==401 || e.status == 403){
+  //Metodo para agregarAuthorizationHeader antes de mandarlos por interceptor. 
+ /* private agregarAuthorizationHeader(){
+    let token = this.authService.token;
+    if(token != null){
+      return this.httpHeaders.append('Authorization','Bearer '+token);
+    }
+
+    return this.httpHeaders;
+
+  }*/
+
+  //metodo para verificar clienteautorizado antes de mandarlo por el interceptor
+ /* private isNoAutorizado(e:any):boolean{
+    if(e.status==401){
+      if(this.authService.isAuthenticated()){
+        this.authService.logout();
+      }
       this.router.navigate(['/login']);
       return true;
     }
+
+    if( e.status == 403){
+      this.Toast.fire({
+        icon: 'warning',
+        title: `${this.authService.usuario.username} No Estas Autorizado`
+      })
+      this.router.navigate(['/clientes']);
+      return true;
+    }
     return false;
-  }
+  }*/
 
   getRegiones(): Observable<Region[]>{
-    return this.http.get<Region[]>(this.url + '/regiones').pipe(
-      catchError(e =>{
-        this.isNoAutorizado(e);
-        return throwError(e);
-      })
-    );
+    // return this.http.get<Region[]>(this.url + '/regiones',{headers: this.agregarAuthorizationHeader()}).pipe( Antes de mandar los header en los interceptores
+    // return this.http.get<Region[]>(this.url + '/regiones').pipe(
+    //   catchError(e =>{
+    //     // this.isNoAutorizado(e);
+    //     return throwError(e);
+    //   })
+    // );
+    return this.http.get<Region[]>(this.url + '/regiones');
   }
 
   getClientes(page:number): Observable<any>{
@@ -88,18 +117,22 @@ export class ClienteService {
   }
 
   create(cliente:Cliente): Observable<Cliente>{
-    return this.http.post<Cliente>(this.url, cliente, {headers: this.httpHeaders}).pipe(
+    // return this.http.post<Cliente>(this.url, cliente, {headers: this.agregarAuthorizationHeader()}).pipe( antes de mandarlo por interceptor
+    return this.http.post<Cliente>(this.url, cliente).pipe(
+
       map((response: any) => response.cliente as Cliente),
       catchError(e =>{
-        if(this.isNoAutorizado(e)){
-          return throwError(e);
-        }
+        // if(this.isNoAutorizado(e)){
+        //   return throwError(e);
+        // }
 
         if(e.status == 400){
           return throwError(e);
         }
+        if(e.error.mensaje){
 
-        console.error(e.error.mensaje);
+          console.error(e.error.mensaje);
+        }
         this.Toast.fire({
           icon: 'error',
           title: `Error al Crear ${e.error.mensaje}`
@@ -110,19 +143,26 @@ export class ClienteService {
   }
 
   getCliente(id: number): Observable<Cliente>{
+    // return this.http.get<Cliente>(`${this.url}/${id}`,{headers:this.agregarAuthorizationHeader()}).pipe(
     return this.http.get<Cliente>(`${this.url}/${id}`).pipe(
+
       catchError(e =>{
 
-        if(this.isNoAutorizado(e)){
-          return throwError(e);
-        }
+        // if(this.isNoAutorizado(e)){
+        //   return throwError(e);
+        // }
 
         if(e.status == 400){
           return throwError(e);
         }
+        if(e.status!=401){
+          this.router.navigate(['/clientes']);
+        }
+        
+        if(e.error.mensaje){
 
-        this.router.navigate(['/clientes']);
-        console.error(e.error.mensaje);
+          console.error(e.error.mensaje);
+        }
         this.Toast.fire({
           icon: 'error',
           title: `Error al Mostrar ${e.error.mensaje}`
@@ -134,18 +174,23 @@ export class ClienteService {
   }
 
   update(cliente: Cliente): Observable<Cliente>{
-    return this.http.put<Cliente>(`${this.url}/${cliente.id}`, cliente, {headers: this.httpHeaders}).pipe(
+    // return this.http.put<Cliente>(`${this.url}/${cliente.id}`, cliente, {headers:this.agregarAuthorizationHeader()}).pipe(
+    return this.http.put<Cliente>(`${this.url}/${cliente.id}`, cliente).pipe(
+
       catchError(e =>{
 
-        if(this.isNoAutorizado(e)){
-          return throwError(e);
-        }
+        // if(this.isNoAutorizado(e)){
+        //   return throwError(e);
+        // }
 
         if(e.status == 400){
           return throwError(e);
         }
 
-        console.error(e.error.mensaje);
+        if(e.error.mensaje){
+
+          console.error(e.error.mensaje);
+        }
         this.Toast.fire({
           icon: 'error',
           title: `Error al Actualizar ${e.error.mensaje}`
@@ -158,14 +203,19 @@ export class ClienteService {
   }
 
   delete(id: number): Observable<Cliente>{
-    return this.http.delete<Cliente>(`${this.url}/${id}`, { headers: this.httpHeaders }).pipe(
+    // return this.http.delete<Cliente>(`${this.url}/${id}`, { headers: this.agregarAuthorizationHeader() }).pipe(
+    return this.http.delete<Cliente>(`${this.url}/${id}`).pipe(
+
       catchError(e =>{
         
-        if(this.isNoAutorizado(e)){
-          return throwError(e);
-        }
+        // if(this.isNoAutorizado(e)){
+        //   return throwError(e);
+        // }
 
-        console.error(e.error.mensaje);
+        if(e.error.mensaje){
+
+          console.error(e.error.mensaje);
+        }
         this.Toast.fire({
           icon: 'error',
           title: `Error al Eliminar ${e.error.mensaje}`
@@ -181,19 +231,28 @@ export class ClienteService {
     formData.append("archivo", archivo);//mismo nombre de parametro que esta en el back-end
     formData.append("id",id);
 
+    // let httpHeaders = new HttpHeaders;
+    // let token = this.authService.token;
+    // if(token != null){
+    //   httpHeaders = httpHeaders.append('Authorization','Bearer '+token);
+    // }
+
     const req = new HttpRequest('POST', `${this.url}/upload/`, formData, {
-      reportProgress: true
+      reportProgress: true,
+      // headers: httpHeaders
     });
 
-    return this.http.request(req).pipe(
+    return this.http.request(req);
+
+   /* return this.http.request(req).pipe(
       map((event: HttpEvent<any>) => {
         return event;
     }),
     catchError((e: any) => {
-      this.isNoAutorizado(e);
+      // this.isNoAutorizado(e);
         return throwError(e);
     }
-    ));
+    ));*/
 
     // metodo para subir las imagenes antes de la barra de progreso
     // return this.http.post(`${this.url}/upload/`, formData).pipe(
